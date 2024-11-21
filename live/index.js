@@ -1,7 +1,19 @@
 import fs from "fs";
 import WebSocket from "ws";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
 
-const API_KEY = "3611ced9-2388-4bbe-b707-8970580e2a09";
+// Load environment variables
+dotenv.config();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const API_KEY = process.env.GLADIA_API_KEY;
+
+if (!API_KEY) {
+  console.error("Error: GLADIA_API_KEY not found in environment variables");
+  process.exit(1);
+}
 
 async function main() {
   // Read the audio file
