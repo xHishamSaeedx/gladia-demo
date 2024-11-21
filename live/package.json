@@ -1,0 +1,15 @@
+{
+  "name": "live-transcription",
+  "version": "1.0.0",
+  "description": "Live audio transcription using Gladia API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "ws": "^8.13.0",
+    "node-fetch": "^2.6.9"
+  },
+  "type": "commonjs"
+}
