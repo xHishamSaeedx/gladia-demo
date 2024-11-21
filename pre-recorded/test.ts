@@ -1,3 +1,9 @@
+import dotenv from "dotenv";
+import path from "path";
+
+// Configure dotenv
+dotenv.config({ path: path.resolve(__dirname, ".env") });
+
 async function makeFetchRequest(url: string, options: any) {
   const response = await fetch(url, options);
   return response.json();
@@ -10,8 +16,15 @@ async function pollForResult(resultUrl: string, headers: any) {
 
     if (pollResponse.status === "done") {
       console.log("- Transcription done: \n");
-      const translation = pollResponse.result.translation;
-      console.log(translation);
+
+      // Log the detected language
+      const detectedLanguage = pollResponse.result.language;
+      console.log(`Detected language: ${detectedLanguage}`);
+
+      // Log the transcription
+      const transcription = pollResponse.result.transcription;
+      console.log("\nTranscription:");
+      console.log(transcription);
       break;
     } else {
       console.log("Transcription status : ", pollResponse.status);
@@ -21,20 +34,25 @@ async function pollForResult(resultUrl: string, headers: any) {
 }
 
 async function startTranscription() {
-  const gladiaKey = "b2f341a3-9b2b-468e-8bc2-c9f456682450";
+  const gladiaKey = process.env.GLADIA_API_KEY;
+
+  if (!gladiaKey) {
+    throw new Error("GLADIA_API_KEY is not set in environment variables");
+  }
+
   const requestData = {
     audio_url:
-      "https://bunjuqkhbmzgpytdqmrt.supabase.co/storage/v1/object/sign/conversations/Recording%20(2).wav?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJjb252ZXJzYXRpb25zL1JlY29yZGluZyAoMikud2F2IiwiaWF0IjoxNzMyMTkyMzM3LCJleHAiOjE3MzI3OTcxMzd9.Fjlb7TBDtOuU_N4d1nkmvu__Q1zi9Kao14cDLwkzyjA&t=2024-11-21T12%3A32%3A15.231Z",
-    enable_code_switching: true,
+      "https://storage.googleapis.com/elevenlab/ElevenLabs_2024-11-21T12_28_53_Adam%20Stone%20-%20late%20night%20radio_pvc_s80_sb98_m1.mp3",
+    enable_code_switching: true, // Enable detection of language switches
     code_switching_config: {
-      languages: ["en", "ar"],
+      languages: [], // Empty array means detect any language
     },
-    translation: true,
-    translation_config: {
-      target_languages: ["en", "ar"],
-      model: "base", // "enhanced" is slower but of better quality
-    },
+    translation: false, // Disable translation since we only want the original
+    diarization: false, // Disable other features we don't need
+    subtitles: false,
+    summarization: false,
   };
+
   const gladiaUrl = "https://api.gladia.io/v2/pre-recorded/";
   const headers = {
     "x-gladia-key": gladiaKey,
